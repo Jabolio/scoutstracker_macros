@@ -1,8 +1,8 @@
 // ==UserScript==
 // @name         ScoutsTracker - Auto-pay meeting dues with Wallet funds
-// @namespace    https://github.com/jabolio/scoutstracker_macros
-// @updateURL    
-// @downloadURL  
+// @namespace    https://github.com/Jabolio/scoutstracker_macros
+// @updateURL    https://github.com/Jabolio/scoutstracker_macros/blob/0aec081dcde4ec9373220969db2aad3570dbf658/st_autopay_dues.js
+// @downloadURL  https://github.com/Jabolio/scoutstracker_macros/blob/0aec081dcde4ec9373220969db2aad3570dbf658/st_autopay_dues.js
 // @version      1.0
 // @description  After an event has completed, automatically apply attendee credits toward event dues/fees if there are enough available.
 // @author       Jean-Paul Deveaux
