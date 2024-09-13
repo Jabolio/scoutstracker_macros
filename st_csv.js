@@ -1,10 +1,13 @@
 // ==UserScript==
 // @name         ScoutsTracker - Transaction CSV Download
-// @namespace    https://github.com/jabolio/scoutstracker_macros
-// @version      1.0
+// @namespace    http://1sttimberlea.ca/
 // @description  CSV download of recent wallet transactions
 // @author       Jean-Paul Deveaux
 // @match        https://scoutstracker.ca/*/
+// @updateURL    https://github.com/Jabolio/scoutstracker_macros/raw/main/st_csv.js
+// @downloadURL  https://github.com/Jabolio/scoutstracker_macros/raw/main/st_csv.js
+// @supportURL   https://github.com/Jabolio/scoutstracker_macros/issues
+// @version      2024.09.13
 // @sandbox      JavaScript
 // @run-at       document-idle
 // @grant        GM_setValue

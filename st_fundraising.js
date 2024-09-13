@@ -1,10 +1,13 @@
 // ==UserScript==
 // @name         ScoutsTracker - Distribution of shared fundraising profits
-// @namespace    https://github.com/jabolio/scoutstracker_macros
-// @version      1.0
+// @namespace    http://1sttimberlea.ca/
 // @description  Adds an input box to a fundrasing event page to allow a user to add a constant amount to all attendees
 // @author       Jean-Paul Deveaux
 // @match        https://scoutstracker.ca/*/
+// @updateURL    https://github.com/Jabolio/scoutstracker_macros/raw/main/st_fundraising.js
+// @downloadURL  https://github.com/Jabolio/scoutstracker_macros/raw/main/st_fundraising.js
+// @supportURL   https://github.com/Jabolio/scoutstracker_macros/issues
+// @version      2024.09.13
 // @sandbox      JavaScript
 // @run-at       document-idle
 // @grant        GM_setValue

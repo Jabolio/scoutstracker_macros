@@ -1,10 +1,13 @@
 // ==UserScript==
 // @name         ScoutsTracker - Event overpayment sent to Wallet
-// @namespace    https://github.com/jabolio/scoutstracker_macros
-// @version      1.0
+// @namespace    http://1sttimberlea.ca/
 // @description  If a youth pays extra dues, automatically send the balance to the wallet, instead of having to do an extra reimbursement charge
 // @author       Jean-Paul Deveaux
 // @match        https://scoutstracker.ca/*/
+// @updateURL    https://github.com/Jabolio/scoutstracker_macros/raw/main/st_overpayment.js
+// @downloadURL  https://github.com/Jabolio/scoutstracker_macros/raw/main/st_overpayment.js
+// @supportURL   https://github.com/Jabolio/scoutstracker_macros/issues
+// @version      2024.09.13
 // @sandbox      JavaScript
 // @run-at       document-idle
 // ==/UserScript==
