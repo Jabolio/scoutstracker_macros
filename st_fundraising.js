@@ -8,7 +8,6 @@
 // @downloadURL  https://github.com/Jabolio/scoutstracker_macros/raw/main/st_fundraising.js
 // @supportURL   https://github.com/Jabolio/scoutstracker_macros/issues
 // @version      2024.09.13
-// @sandbox      JavaScript
 // @run-at       document-idle
 // @grant        GM_setValue
 // @grant        GM_getValue
