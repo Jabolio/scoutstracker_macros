@@ -8,12 +8,17 @@
 // @downloadURL  https://github.com/Jabolio/scoutstracker_macros/raw/main/st_autopay_dues.js
 // @supportURL   https://github.com/Jabolio/scoutstracker_macros/issues
 // @version      2024.09.13
-// @sandbox      JavaScript
 // @run-at       document-idle
 // @grant        GM_setValue
 // @grant        GM_getValue
 // @grant        GM_addStyle
 // ==/UserScript==
+
+
+// ==============================================================================================================================
+// NOTE: As of October, 2024, ScoutsTracker has improved its "Pay All" functionality, making this script unnecessary.
+// ==============================================================================================================================
+
 
 (function() {
     'use strict';
