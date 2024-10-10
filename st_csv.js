@@ -7,8 +7,7 @@
 // @updateURL    https://github.com/Jabolio/scoutstracker_macros/raw/main/st_csv.js
 // @downloadURL  https://github.com/Jabolio/scoutstracker_macros/raw/main/st_csv.js
 // @supportURL   https://github.com/Jabolio/scoutstracker_macros/issues
-// @version      2024.09.13
-// @sandbox      JavaScript
+// @version      2024.10.10
 // @run-at       document-idle
 // @grant        GM_setValue
 // @grant        GM_getValue
@@ -22,6 +21,7 @@
     const urlMatch = window.location.href.match(/ca\/([^\/]*)\//)[1];
     const tSection = urlMatch.charAt(0).toUpperCase() + urlMatch.slice(1);
 
+    // income and expense special meeting ledgers.  Modify as needed.
     const tINCOME_LEDGERS = ['Income:Cubs Dues & Fees:Kub Kars','Income:Cubs Dues & Fees:Mini-Alert','Income:Cubs Dues & Fees:Fantasy Camp',
                              'Income:Group Event / Activity Fees:Camp fees:Lodges and Lairs','Income:Group Event / Activity Fees:Camp fees:Year-End Group Camp',
                              'Income:Group Event / Activity Fees:Mooseheads Game'];
@@ -37,10 +37,9 @@
     console.log('gnucash cutoff date - '+tCutOff);
 
     class tTransaction {
-        constructor(date, desc, event, amt, transfer, account) {
+        constructor(date, desc, amt, transfer, account) {
             this.date = date;
             this.description = desc;
-            this.event = event;
 
             if(amt < 0) {
                 this.amount = amt * -1;
@@ -66,7 +65,7 @@
         }
 
         toString() {
-            return this.date+"\t"+this.description+"\t"+this.event+"\t"+this.amount+"\t"+this.transfer+"\t"+this.account+"\n";
+            return this.date+"\t"+this.description+"\t"+this.amount+"\t"+this.transfer+"\t"+this.account+"\n";
         }
     };
 
@@ -118,9 +117,10 @@
                         ledger = 'Income:Reclaimed Credits:'+tSection;
                     }
 
-                    // if an outing ID has been specified, then this was cash that was received, so into the Cash on Hand account
-                    else if(outingID > 0) {
-                        ledger = 'Assets:Current Assets:Cash on Hand';
+                    // if none of the above cases match, this is cash coming in, so it goes to the Cash On Hand ledger
+                    else {
+                        description = 'Money received, added to Wallet'
+                        ledger = 'Assets:Current Assets:Cash on Hand:'+tSection;
                     }
 
                     break;
@@ -138,7 +138,7 @@
                                 if(label.labelkey == 'meeting') {
                                     ledger = 'Income:'+tSection+' Dues & Fees:Meeting Dues';
                                     if(!description) {
-                                        description = 'Dues paid';
+                                        description = 'Dues paid - '+eventName;
                                     }
                                 }
                             }
@@ -160,7 +160,7 @@
                 throw "Ledger not defined - payment type: "+payment.type+", Amount: "+payment.amount+", Youth: "+youth+' on '+date;
             }
 
-            super(date,description,eventName,payment.amount,liabilities,ledger);
+            super(date,description+" ("+date+")",payment.amount,liabilities,ledger);
         }
 
         static typeCheck(type) {
@@ -183,13 +183,13 @@
             eventName = outing.displayname;
 
             // if 'EFT' is in the description, then it's going directly into the Checking Account
-            if(description.indexOf('EFT') >= 0) {
+            if(description.toUpperCase().indexOf('EFT') >= 0) {
                 ledger = 'Assets:Current Assets:Checking Account';
             }
 
             // if 'CASH' was in the description, then mark it as cash
-            else if(description.indexOf('CASH') >= 0) {
-                ledger = 'Assets:Current Assets:Cash on Hand';
+            else if(description.toUpperCase().indexOf('CASH') >= 0) {
+                ledger = 'Assets:Current Assets:Cash on Hand:'+tSection;
             }
 
             // if the payment amount is positive and we haven't seen anything else yet, it will go into Accounts Payable.
@@ -213,7 +213,7 @@
                 }
             }
 
-            super(date,description,eventName,payment.amount,ledger,transfer);
+            super(date,description+" ("+date+")",payment.amount,ledger,transfer);
         }
 
         // we only want payment type 0 (fee paid/refunded) or 1 (expense); type >= 2 can be ignored in this context
