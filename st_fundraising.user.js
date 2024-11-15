@@ -83,7 +83,19 @@
     });
 
     // make sure all the DOM nodes I need are hanging around...
-    Window.gnucash.checkNodes(NODES, 'st_fundraising'); 
+    try {
+        NODES.forEach((node) => {
+            if(!$(node).length > 0) {
+               throw new Error( 'DOM Node "'+node+'" could not be found.');
+            }
+        });    
+    }
+    catch(err) {
+        openLightBox( {
+            text: 'st_fundraising: '+err,
+            canClose: true,
+            size: 'big'} );    
+    }
 
     GM_addStyle(`
     #event-fundraising-credit a {

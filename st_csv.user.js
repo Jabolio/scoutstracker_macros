@@ -337,22 +337,6 @@
         return lastRun;
     }
 
-    gnucash.checkNodes = function(nodes, module) {
-        try {
-            nodes.forEach((node) => {
-                if(!$(node).length > 0) {
-                   throw new Error( 'DOM Node "'+node+'" could not be found.');
-                }
-            });    
-        }
-        catch(err) {
-            openLightBox( {
-                text: module+': '+err,
-                canClose: true,
-                size: 'big'} );    
-        }
-    }
-
     // monitor when the event is changed so I can properly populate the custom ledger account box
     let observer = new MutationObserver(function() {
         let outing_id = getCurrentEvent();
@@ -374,7 +358,19 @@
     });
 
     // make sure all the DOM nodes I need are hanging around...
-    Window.gnucash.checkNodes(NODES, 'st_csv');
+    try {
+        NODES.forEach((node) => {
+            if(!$(node).length > 0) {
+               throw new Error( 'DOM Node "'+node+'" could not be found.');
+            }
+        });    
+    }
+    catch(err) {
+        openLightBox( {
+            text: 'st_csv: '+err,
+            canClose: true,
+            size: 'big'} );    
+    }
 
     GM_addStyle(`
     div.tLabel {

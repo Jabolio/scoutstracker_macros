@@ -72,7 +72,19 @@
     }
 
     // make sure all the DOM nodes I need are hanging around...
-    Window.gnucash.checkNodes(NODES, 'st_overpayment');
+    try {
+        NODES.forEach((node) => {
+            if(!$(node).length > 0) {
+               throw new Error( 'DOM Node "'+node+'" could not be found.');
+            }
+        });    
+    }
+    catch(err) {
+        openLightBox( {
+            text: 'st_overpayment: '+err,
+            canClose: true,
+            size: 'big'} );    
+    }
 
     // remove the regular "Add Entry" button and add mine, which calls my method (I was not able to override the JS onclick that was already there)
     $(PAYMENT_SRC_NODE+' ul').find('li:last').remove();
