@@ -18,7 +18,10 @@
     'use strict';
     const MONEY_MGMT = 'h1:contains("Money Management")',
           EVENT_DTLS = '#event-details',
-          VIEW_EVENT = '#view-event';
+          VIEW_EVENT = '#view-event',
+          MEMBER_PAY = '#event-member-payments',
+          MEMBER_PAY_MATCH = /doEditMemberPayment\(\s*'([^']+)'\s*,\s*'([^']+)'\s*\)/,
+          NO_EDIT_SPAN = '<span title="This transaction was made before the most recent CSV export, so it cannot be edited.">No Edit</span>';
 
     const NODES = [MONEY_MGMT, EVENT_DTLS];
 
@@ -30,14 +33,14 @@
     // income and expense special meeting ledgers.  Modify as needed.
     const tINCOME_LEDGERS = ['Income:Cubs Dues & Fees:Kub Kars','Income:Cubs Dues & Fees:Mini-Alert',
                              'Income:Cubs Dues & Fees:Fantasy Camp', 'Income:Cubs Dues & Fees:Cabin Event',
-                             'Income:Beavers Dues & Fees:Cabin Event',
+                             'Income:Beavers Dues & Fees:Movie Night',
                              'Income:Group Event / Activity Fees:Camp fees:Lodges and Lairs',
                              'Income:Group Event / Activity Fees:Camp fees:Year-End Group Camp',
                              'Income:Group Event / Activity Fees:Camp fees:Cabin Event',
                              'Income:Group Event / Activity Fees:Mooseheads Game'];
 
     const tEXPENSE_LEDGERS = ['Expenses:Cubs:Fantasy Camp','Expenses:Cubs:Kub Kar Rally','Expenses:Cubs:Mini-Alert', 
-                              'Expenses:Cubs:Cabin Event','Expenses:Beavers:Cabin Event',
+                              'Expenses:Cubs:Cabin Event','Expenses:Beavers:Movie Night',
                               'Expenses:Group Event / Activity Expenses:Camp-related:Lodges and Lairs',
                               'Expenses:Group Event / Activity Expenses:Camp-related:Year-End Camp',
                               'Expenses:Group Event / Activity Expenses:Camp-related:Cabin Event',
@@ -45,8 +48,8 @@
                               'Expenses:Group Event / Activity Expenses:Mooseheads Game',
                               'Expenses:Group Event / Activity Expenses:Food and Drink'];
 
-    let tCutOff = GM_getValue('lastRun_'+tSection, 0);
-    console.log('gnucash cutoff date - '+tCutOff);
+    let tLastCSVExport = GM_getValue('lastRun_'+tSection, 0);
+    console.log('gnucash cutoff date - '+tLastCSVExport);
 
     class tTransaction {
         constructor(date, desc, amt, transfer, account) {
@@ -206,6 +209,12 @@
                 ledger = 'Assets:Current Assets:Cash on Hand:'+tSection;
             }
 
+            // if 'DONATION' was in the description, then add it to the Income:Donations ledger -
+            // the scouter has explicitly requested to not be reimbursed for this expense.
+            else if(description.toUpperCase().indexOf('DONATION') >= 0) {
+                ledger = 'Income:Donations';
+            }
+
             // if the payment amount is positive and we haven't seen anything else yet, it will go into Accounts Payable.
             else if(payment.amount > 0) {
                 ledger = 'Liabilities:Accounts Payable';
@@ -244,7 +253,7 @@
     gnucash.createCSVReport = function() {
         let transactions = [], t;
         let member, memberName, ledgerID, mapMapLedgerPayments;
-        let cutOff = new Date(tCutOff).getTime();
+        let cutOff = new Date(tLastCSVExport).getTime();
 
         try {
             for (const [memberType, TransactionClass] of Object.entries(tMEMBER_TYPES)) {
@@ -330,7 +339,7 @@
     };
 
     gnucash.updateLastRun = function(lastRun) {
-        tCutOff = new Date(lastRun).getTime();
+        tLastCSVExport = new Date(lastRun).getTime();
         console.log('new gnucash cutoff date - '+lastRun);
         GM_setValue('lastRun_'+tSection, lastRun);
         $('#gnucash-last-run').val(lastRun);
@@ -354,6 +363,30 @@
     });
 
     observer.observe(document.querySelector(VIEW_EVENT), {
+        attributes: true
+    });
+
+    // remove the edit link on any event payment transactions that came before the last CSV export
+    let memberPayObserver = new MutationObserver(function() {
+        $(MEMBER_PAY+' .payment-edit').each(function() {
+            const clickAttr = $(this).find('a').attr('onclick');
+            const match = clickAttr.toString().match(MEMBER_PAY_MATCH);
+            const key = match[1];
+            const payment_id = match[2]; 
+            const outing = getOuting(getCurrentEvent());
+
+            const iPayment = getMemberPaymentIndexByKey( outing, key, payment_id );
+            const payment = getMemberPaymentByIndex( outing, key, iPayment );
+        
+            // if the payment timestamp is before the CSV export timestamp, remove the edit link.
+            if(payment.inserted < new Date(tLastCSVExport).getTime()) {
+                $(this).html(NO_EDIT_SPAN);
+            }
+        })
+    });
+
+    // this observer fires when the value of the MEMBER_PAY div changes
+    memberPayObserver.observe(document.querySelector(MEMBER_PAY), {
         attributes: true
     });
 
@@ -393,7 +426,7 @@
     </li>
     <li class="input ani-placeholder">
       <div class="tLabel">GnuCash Last Run</div>
-      <input type="datetime-local" id="gnucash-last-run" onchange="Window.gnucash.updateLastRun(this.value);" required="" value="${tCutOff}">
+      <input type="datetime-local" id="gnucash-last-run" onchange="Window.gnucash.updateLastRun(this.value);" required="" value="${tLastCSVExport}">
     </li>`);
 
     // inject the Custom Ledger Account input on the event's Edit page, which changes when the event page is changed.
