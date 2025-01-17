@@ -7,7 +7,7 @@
 // @updateURL    https://github.com/Jabolio/scoutstracker_macros/raw/main/st_csv.user.js
 // @downloadURL  https://github.com/Jabolio/scoutstracker_macros/raw/main/st_csv.user.js
 // @supportURL   https://github.com/Jabolio/scoutstracker_macros/issues
-// @version      2024.11.15
+// @version      2025.01.17
 // @run-at       document-idle
 // @grant        GM_setValue
 // @grant        GM_getValue
