@@ -7,7 +7,7 @@
 // @updateURL    https://github.com/Jabolio/scoutstracker_macros/raw/main/st_overpayment.user.js
 // @downloadURL  https://github.com/Jabolio/scoutstracker_macros/raw/main/st_overpayment.user.js
 // @supportURL   https://github.com/Jabolio/scoutstracker_macros/issues
-// @version      2024.11.15
+// @version      2025.02.03
 // @run-at       document-idle
 // ==/UserScript==
 
@@ -21,23 +21,18 @@
 
     var toWallet = Window.toWallet = {};
     toWallet.doIt = function() {
-        let cost, amt = parseAndValidatePaymentAmount2('input[name="payment_inc"]', 'to deposit');
+        let amt = parseAndValidatePaymentAmount2('input[name=payment_inc]', 'to deposit');
         const outing = g_eventUnderEdit;                                        // reference the global current event object, so changes will persist
         const member_id = $(PAYMENT_NODE).attr( "data-keyorid" );		// keyOrID is either a memberID, or for isMultiAccountSource events, a subscriber outing key
         const paid_cash = $(PAYMENT_SRC_NODE + ' li[data-iledger=-1].selected').length > 0;
         const youth = getMember(member_id);
         const now = getNow();
 
-        // this only kicks in if the member does not have payments allocated for this event yet.
-        if(outing.memberpayments[member_id] === undefined) {
-            // get cost for this youth.  assume default cost, then check for override.
-            cost = outing.cost.participant;
-            for(const override of outing.cost.overrides) {
-                if(override.memberid = member_id) {
-                    cost = override.cost;
-                    break;
-                }
-            }
+        let cost = getTotalMemberCost( outing, member_id );
+
+        // how much has been paid so far for this event?
+        if(Array.isArray(outing.memberpayments[member_id])) {
+            outing.memberpayments[member_id].forEach((payment) => cost -= payment.amount );
         }
 
         // if this is a Payment, and the cost is there, and the amount paid is more than that, and the transaction was cash,
@@ -54,8 +49,9 @@
                 }
             }
 
-            const payment_new = buildMemberPayment( outing.outingid, getRandomLID(), member_id, 1, overpayment, prefix+'Overpayment', '', now, now, false);
-            payment_new.iledger = 0;         // this payment must be sent to the cash ledger
+            // the time of the overpayment transaction is "a bit in the future" so it will show up after the actual event payment.
+            // prototype: buildMemberPayment( strContext, memberID, ledgerID, transactionID, keyOrID, eType, fAmount, strNoteNew, strCategory, iLedger, timestampInserted, timestampUpdated, isDeposit, isNew )
+            const payment_new = buildMemberPayment( 'overpayment', member_id, outing.outingid, getRandomLID(), member_id, 1, overpayment, prefix+'Overpayment', '', 0, now+1000, now+1000, false, true);
             addEventMemberPayment(outing, member_id, payment_new);
 
             // popup so the user knows that something happened.
@@ -87,6 +83,6 @@
     }
 
     // remove the regular "Add Entry" button and add mine, which calls my method (I was not able to override the JS onclick that was already there)
-    $(PAYMENT_SRC_NODE+' ul').find('li:last').remove();
-    $(PAYMENT_SRC_NODE+' ul').append('<li class="buttons"><div id="update-payment-btn-custom" class="button" onclick="Window.toWallet.doIt()">Add Entry</div></li>');
+   $(PAYMENT_SRC_NODE+' ul').find('li:last').remove();
+   $(PAYMENT_SRC_NODE+' ul').append('<li class="buttons"><div id="update-payment-btn-custom" class="button" onclick="Window.toWallet.doIt()">Add Entry</div></li>');
 })();
