@@ -7,7 +7,7 @@
 // @updateURL    https://github.com/Jabolio/scoutstracker_macros/raw/main/st_csv.user.js
 // @downloadURL  https://github.com/Jabolio/scoutstracker_macros/raw/main/st_csv.user.js
 // @supportURL   https://github.com/Jabolio/scoutstracker_macros/issues
-// @version      2025.01.17
+// @version      2025.02.08
 // @run-at       document-idle
 // @grant        GM_setValue
 // @grant        GM_getValue
@@ -98,13 +98,18 @@
 
             switch(payment.type) {
                 case 3: // money coming in.
-                    // if 'EFT' is in the notes, then it's going directly into the Checking Account
-                    if(description.toUpperCase().indexOf('EFT') >= 0 && payment.amount > 0) {
+                    // if 'EFT' is in the notes, or if it is a category 3 payment (EFT - Feb8/25) then it's going directly into the Checking Account
+                    if(payment.category = 3 || description.toUpperCase().indexOf('EFT') >= 0) {
                         if(payment.amount < 0) {
                             throw "'EFT' keyword detected in transaction description for negative deposit - youth: "+youth+', date: '+date;
                         }
 
                         ledger = 'Assets:Current Assets:Checking Account';
+                    }
+
+                    // if payment category is 2, this is a cheque. 
+                    else if(payment.category = 2) {
+                        ledger = 'Assets:Current Assets:Cheques:'+tSection;
                     }
 
                     // if "fundrais" is in the description text, then it's money related to fundraising, and it should be directed to the transfers account.
@@ -200,13 +205,18 @@
             }
 
             // if 'EFT' is in the description, then it's going directly into the Checking Account
-            if(description.toUpperCase().indexOf('EFT') >= 0) {
+            if(payment.category = 3 || description.toUpperCase().indexOf('EFT') >= 0) {
                 ledger = 'Assets:Current Assets:Checking Account';
             }
 
             // if 'CASH' was in the description, then mark it as cash
-            else if(description.toUpperCase().indexOf('CASH') >= 0) {
+            else if(payment.category = 1 || description.toUpperCase().indexOf('CASH') >= 0) {
                 ledger = 'Assets:Current Assets:Cash on Hand:'+tSection;
+            }
+
+            // if a category 2, this is a cheque. 
+            else if(payment.category = 2) {
+                ledger = 'Assets:Current Assets:Cheques:'+tSection;
             }
 
             // if 'DONATION' was in the description, then add it to the Income:Donations ledger -
