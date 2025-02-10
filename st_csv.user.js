@@ -7,7 +7,7 @@
 // @updateURL    https://github.com/Jabolio/scoutstracker_macros/raw/main/st_csv.user.js
 // @downloadURL  https://github.com/Jabolio/scoutstracker_macros/raw/main/st_csv.user.js
 // @supportURL   https://github.com/Jabolio/scoutstracker_macros/issues
-// @version      2025.02.08
+// @version      2025.02.10
 // @run-at       document-idle
 // @grant        GM_setValue
 // @grant        GM_getValue
@@ -99,7 +99,7 @@
             switch(payment.type) {
                 case 3: // money coming in.
                     // if 'EFT' is in the notes, or if it is a category 3 payment (EFT - Feb8/25) then it's going directly into the Checking Account
-                    if(payment.category = 3 || description.toUpperCase().indexOf('EFT') >= 0) {
+                    if(payment.category == 3 || description.toUpperCase().indexOf('EFT') >= 0) {
                         if(payment.amount < 0) {
                             throw "'EFT' keyword detected in transaction description for negative deposit - youth: "+youth+', date: '+date;
                         }
@@ -108,7 +108,7 @@
                     }
 
                     // if payment category is 2, this is a cheque. 
-                    else if(payment.category = 2) {
+                    else if(payment.category == 2) {
                         ledger = 'Assets:Current Assets:Cheques:'+tSection;
                     }
 
@@ -139,7 +139,7 @@
 
                     // if none of the above cases match, this is cash coming in, so it goes to the Cash On Hand ledger
                     else {
-                        description = 'Money received, added to Wallet'
+                        description = payment.amount > 0 ? 'Money received, added to Wallet' : 'Cash handed back to youth';
                         ledger = 'Assets:Current Assets:Cash on Hand:'+tSection;
                     }
 
@@ -205,17 +205,17 @@
             }
 
             // if 'EFT' is in the description, then it's going directly into the Checking Account
-            if(payment.category = 3 || description.toUpperCase().indexOf('EFT') >= 0) {
+            if(payment.category == 3 || description.toUpperCase().indexOf('EFT') >= 0) {
                 ledger = 'Assets:Current Assets:Checking Account';
             }
 
             // if 'CASH' was in the description, then mark it as cash
-            else if(payment.category = 1 || description.toUpperCase().indexOf('CASH') >= 0) {
+            else if(payment.category == 1 || description.toUpperCase().indexOf('CASH') >= 0) {
                 ledger = 'Assets:Current Assets:Cash on Hand:'+tSection;
             }
 
             // if a category 2, this is a cheque. 
-            else if(payment.category = 2) {
+            else if(payment.category == 2) {
                 ledger = 'Assets:Current Assets:Cheques:'+tSection;
             }
 
