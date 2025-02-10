@@ -7,7 +7,7 @@
 // @updateURL    https://github.com/Jabolio/scoutstracker_macros/raw/main/st_overpayment.user.js
 // @downloadURL  https://github.com/Jabolio/scoutstracker_macros/raw/main/st_overpayment.user.js
 // @supportURL   https://github.com/Jabolio/scoutstracker_macros/issues
-// @version      2025.02.03
+// @version      2025.02.10
 // @run-at       document-idle
 // ==/UserScript==
 
@@ -26,6 +26,7 @@
         const member_id = $(PAYMENT_NODE).attr( "data-keyorid" );		// keyOrID is either a memberID, or for isMultiAccountSource events, a subscriber outing key
         const paid_cash = $(PAYMENT_SRC_NODE + ' li[data-iledger=-1].selected').length > 0;
         const youth = getMember(member_id);
+        const payment_category = $( "select[name=payment_method]" ).val();
         const now = getNow();
 
         let cost = getTotalMemberCost( outing, member_id );
@@ -51,7 +52,7 @@
 
             // the time of the overpayment transaction is "a bit in the future" so it will show up after the actual event payment.
             // prototype: buildMemberPayment( strContext, memberID, ledgerID, transactionID, keyOrID, eType, fAmount, strNoteNew, strCategory, iLedger, timestampInserted, timestampUpdated, isDeposit, isNew )
-            const payment_new = buildMemberPayment( 'overpayment', member_id, outing.outingid, getRandomLID(), member_id, 1, overpayment, prefix+'Overpayment', '', 0, now+1000, now+1000, false, true);
+            const payment_new = buildMemberPayment( 'overpayment', member_id, outing.outingid, getRandomLID(), member_id, 1, overpayment, prefix+'Overpayment', payment_category, 0, now+1000, now+1000, false, true);
             addEventMemberPayment(outing, member_id, payment_new);
 
             // popup so the user knows that something happened.
